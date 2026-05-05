@@ -1,17 +1,16 @@
 import streamlit as st
-import pandas as pd
 from groq import Groq
 from duckduckgo_search import DDGS
+import pandas as pd
 
-# --- CONFIGURAÇÃO DA PÁGINA ---
+# --- CONFIGURAÇÃO DA PÁGINA E DESIGN ---
 st.set_page_config(page_title="Nexus OmniCode", page_icon="⚡", layout="wide")
 
-# --- ESTILO CSS PARA DESIGN BONITO ---
 st.markdown("""
     <style>
     .main { background-color: #0e1117; }
-    .stButton>button { width: 100%; border-radius: 5px; height: 3em; background-color: #4CAF50; color: white; }
-    .stTextInput>div>div>input { color: #4CAF50; }
+    .stButton>button { background-color: #4CAF50; color: white; font-weight: bold; border-radius: 10px; }
+    .stTextArea>div>div>textarea { background-color: #1a1c24; color: #ffffff; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -20,63 +19,102 @@ if 'autenticado' not in st.session_state:
     st.session_state['autenticado'] = False
 
 if not st.session_state['autenticado']:
-    senha = st.text_input("Digite a chave mestra para acessar o Nexus OmniCode:", type="password")
-    if senha == "admin123": # Altere sua senha aqui
-        st.session_state['autenticado'] = True
-        st.rerun()
-    else:
-        st.warning("Sistema Blindado. Aguardando chave...")
-        st.stop()
-
-# --- SIDEBAR (FILTROS E INTEGRAÇÕES) ---
-st.sidebar.title("🔗 Integrações Nexus")
-sistemas = ["GitLab", "Bitbucket", "Azure DevOps", "Gitea", "SourceForge", "FastAPI"]
-for s in sistemas:
-    st.sidebar.toggle(f"Conectar {s}", value=True)
-
-st.sidebar.divider()
-st.sidebar.title("🛠️ Ferramentas")
-funcao = st.sidebar.selectbox("O que deseja fazer?", ["Criar Código do Zero", "Corrigir Erros", "Analisar Performance", "Aprimorar Código Existente"])
-
-# --- FUNÇÃO DE PESQUISA "INVISÍVEL" (Simula consulta humana) ---
-def buscar_conhecimento_ia(pergunta):
-    with DDGS() as ddgs:
-        resultados = [r['body'] for r in ddgs.text(f"melhor solução de código para: {pergunta}", max_results=3)]
-    return "\n".join(resultados)
-
-# --- CORPO PRINCIPAL ---
-st.title("⚡ Nexus OmniCode")
-st.subheader("O Analista Universal de Códigos")
-
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    ideia = st.text_area("Descreva sua ideia ou cole seu código aqui:", height=200, placeholder="Ex: Crie um sistema de login com banco de dados...")
-    arquivo_upload = st.file_uploader("Upload de arquivo para análise", type=['py', 'js', 'html', 'css', 'txt'])
-
-with col2:
-    st.info("O Nexus está consultando múltiplas fontes agora para garantir o melhor resultado.")
-    if st.button("🚀 EXECUTAR NEXUS"):
-        if ideia:
-            with st.spinner("Nexus consultando IAs mundiais e sintetizando resposta..."):
-                # Simulação de consulta e análise
-                contexto_externo = buscar_conhecimento_ia(ideia)
-                
-                # Aqui você conectaria sua API KEY da Groq (Grátis)
-                # Por enquanto, geramos uma resposta simulada de alta qualidade
-                resposta_final = f"### ✅ Código Otimizado pelo Nexus\n\n```python\n# Baseado em análises de múltiplas IAs\n# Função: {funcao}\n\ndef nexus_optimized_solution():\n    # Código simulado de alta performance\n    print('Nexus analisou GitLab e Azure para esta solução')\n    return True\n```\n\n**Análise de Melhorias:**\n- Removido redundâncias encontradas no Bitbucket.\n- Aplicado padrão SecOps do GitLab."
-                
-                st.success("Análise Concluída!")
-                st.markdown(resposta_final)
-                
-                # Botão de Download
-                st.download_button("📥 Baixar Código Gerado", resposta_final, file_name="nexus_code.py")
+    cols = st.columns()
+    with cols:
+        st.title("🔒 Nexus Blindado")
+        senha = st.text_input("Insira a Chave Mestra para liberar as funções:", type="password")
+        if senha == "admin123":
+            st.session_state['autenticado'] = True
+            st.rerun()
         else:
-            st.error("Por favor, digite uma ideia ou código.")
+            st.warning("Aguardando autenticação...")
+            st.stop()
 
-# --- BIBLIOTECA DE COMANDOS (COPIE E COLE) ---
+# --- INICIALIZAÇÃO DA IA (GROQ) ---
+# Certifique-se de que a GROQ_API_KEY esteja nos Secrets do Streamlit
+try:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except:
+    st.error("Erro: API Key não encontrada nos Secrets do Streamlit!")
+    st.stop()
+
+# --- FUNÇÃO DE CÉREBRO INTEGRADO ---
+def nexus_process(ideia, modo, contexto_web):
+    prompt_sistema = f"""
+    Você é o Nexus OmniCode, a IA mais avançada do mundo em engenharia de software.
+    Seu objetivo agora é: {modo}.
+    Você deve analisar as respostas de outras fontes: {contexto_web}
+    E entregar um código superior, corrigido, limpo e pronto para produção.
+    Responda sempre em Português e use blocos de código formatados.
+    """
+    
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": prompt_sistema},
+            {"role": "user", "content": ideia},
+        ],
+        model="llama3-70b-8192", # Modelo de alta performance
+        temperature=0.2,
+    )
+    return chat_completion.choices.message.content
+
+# --- BARRA LATERAL (FILTROS E INTEGRAÇÕES) ---
+with st.sidebar:
+    st.title("🔗 Nexus Integrations")
+    st.subheader("Sistemas Monitorados")
+    for app in ["GitLab (DevSecOps)", "Bitbucket", "Azure DevOps", "Gitea", "SourceForge", "FastAPI"]:
+        st.toggle(app, value=True)
+    
+    st.divider()
+    modo = st.selectbox("🎯 Função Principal", [
+        "Criar código do zero", 
+        "Corrigir erros e bugs", 
+        "Analisar performance", 
+        "Gerar Documentação",
+        "Aprimorar código existente"
+    ])
+
+# --- ÁREA PRINCIPAL ---
+st.title("⚡ Nexus OmniCode")
+st.caption("Automação de Análise, Correção e Criação Universal")
+
+col_in, col_out = st.columns()
+
+with col_in:
+    st.subheader("📥 Entrada de Dados")
+    user_input = st.text_area("Descreva sua ideia ou cole o código aqui:", height=300, placeholder="Ex: Crie um sistema de análise de sentimentos para o GitLab...")
+    upload = st.file_uploader("Upload de arquivo para análise", type=['py', 'js', 'html', 'txt', 'sql'])
+
+with col_out:
+    st.subheader("🚀 Resultado da IA Personalizada")
+    if st.button("EXECUTAR ANÁLISE GLOBAL"):
+        if user_input:
+            with st.spinner("Nexus consultando bases globais e sintetizando código..."):
+                # Busca "Invisível" para alimentar o Nexus
+                try:
+                    with DDGS() as ddgs:
+                        search_results = [r['body'] for r in ddgs.text(f"best practices and code for: {user_input}", max_results=3)]
+                        contexto = "\n".join(search_results)
+                except:
+                    contexto = "Sem acesso à web no momento. Usando base interna."
+
+                # Processamento com a Groq
+                resultado_final = nexus_process(user_input, modo, contexto)
+                st.markdown(resultado_final)
+                
+                # Gerar botão de download
+                st.download_button(
+                    label="📥 Baixar Código Aprimorado",
+                    data=resultado_final,
+                    file_name="nexus_optimized_code.txt",
+                    mime="text/plain"
+                )
+        else:
+            st.error("Digite algo para o Nexus analisar!")
+
+# --- BIBLIOTECA DE COMANDOS ---
 st.divider()
-with st.expander("📚 Biblioteca de Prompts Nexus (Copie e Cole)"):
-    st.code("Nexus, analise este código e aplique padrões de segurança do GitLab SecOps.")
-    st.code("Nexus, crie um script Python que automatize o upload para Bitbucket via API.")
-    st.code("Nexus, encontre erros de lógica neste código e gere a versão aprimorada.")
+with st.expander("📚 Biblioteca de Comandos (Copie e Cole)"):
+    st.code("Nexus, aja como uma IA personalizada e crie um script de automação para o Azure.")
+    st.code("Analise este código, encontre erros e gere uma versão aprimorada com filtros de segurança.")
+    st.code("Crie um arquivo FastAPI completo baseado na ideia acima.")
