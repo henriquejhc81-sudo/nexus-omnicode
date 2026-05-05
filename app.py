@@ -18,7 +18,7 @@ st.markdown("""
 # --- INICIALIZAÇÃO DA IA ---
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-except:
+except Exception as e:
     st.error("Erro: Verifique sua chave API nos Secrets do Streamlit!")
     st.stop()
 
@@ -30,8 +30,7 @@ def nexus_process(ideia, modo, contexto_web):
             model="llama-3.3-70b-versatile",
             temperature=0.1,
         )
-        # CORREÇÃO DEFINITIVA DO ERRO DE CONEXÃO:
-        return completion.choices[0].message.content 
+        return completion.choices[0].message.content
     except Exception as e:
         return f"Erro na conexão com a IA: {e}"
 
@@ -39,12 +38,12 @@ def nexus_process(ideia, modo, contexto_web):
 with st.sidebar:
     st.title("⚙️ Painel Nexus")
     st.caption("Central de Automação Global")
-    
+
     st.divider()
     st.subheader("🔗 Integrações Ativas")
     for app in ["GitLab", "Bitbucket", "Azure", "Gitea", "SourceForge", "FastAPI"]:
         st.toggle(app, value=True)
-    
+
     st.divider()
     modo = st.selectbox("🎯 Função Principal", [
         "Criar código do zero", 
@@ -75,9 +74,9 @@ with col_out:
                     with DDGS() as ddgs:
                         search = [r['body'] for r in ddgs.text(f"melhores práticas para {user_input}", max_results=2)]
                         contexto = "\n".join(search)
-                except:
+                except Exception as e:
                     contexto = "Usando inteligência interna."
-                
+
                 resultado = nexus_process(user_input, modo, contexto)
                 st.session_state['last_result'] = resultado
                 st.markdown(resultado)
@@ -89,9 +88,9 @@ with col_out:
         st.divider()
         st.subheader("💾 Opções de Download")
         formato = st.selectbox("Escolha o formato do arquivo:", [".py", ".js", ".html", ".txt", ".sql", ".css"])
-        
+
         mimes = {".py": "text/x-python", ".js": "text/javascript", ".html": "text/html", ".txt": "text/plain", ".sql": "text/x-sql", ".css": "text/css"}
-        
+
         st.download_button(
             label=f"📥 BAIXAR COMO {formato.upper()}",
             data=st.session_state['last_result'],
