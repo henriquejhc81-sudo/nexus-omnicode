@@ -41,17 +41,17 @@ def nexus_process(ideia, modo, contexto_web):
     Você é o Nexus OmniCode, a IA mais avançada do mundo. 
     Sua missão atual: {modo}.
     Considere estas informações externas coletadas: {contexto_web}
-    Corrija erros, otimize a lógica e entregue um código perfeito e profissional.
+    Se o usuário pedir incremento, mantenha a lógica atual e adicione as novas funções solicitadas.
     Responda em Português com blocos de código formatados.
     """
     try:
-        # CORREÇÃO DEFINITIVA: Usando o modelo atualizado llama-3.3-7b-versatile
+        # MODELO CORRIGIDO PARA VERSÃO ESTÁVEL
         chat_completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": prompt_sistema},
                 {"role": "user", "content": ideia},
             ],
-            model="llama-3.3-7b-specdec", # Modelo ultra veloz e atualizado
+            model="llama-3.1-70b-versatile",
             temperature=0.2,
         )
         return chat_completion.choices.message.content
@@ -66,12 +66,13 @@ with st.sidebar:
         st.toggle(app, value=True)
     
     st.divider()
+    # NOVA FUNÇÃO INCLUÍDA: "Incremento Mágico"
     modo = st.selectbox("🎯 Função Principal", [
         "Criar código do zero", 
         "Corrigir erros e bugs", 
+        "Incremento Mágico (Adicionar Novas Funções)", 
         "Analisar performance", 
-        "Aprimorar código existente",
-        "Gerar Documentação"
+        "Aprimorar código existente"
     ])
 
 # --- ÁREA PRINCIPAL ---
@@ -82,21 +83,21 @@ col_in, col_out = st.columns(2)
 
 with col_in:
     st.subheader("📥 Entrada de Dados")
-    user_input = st.text_area("Descreva sua ideia ou cole o código aqui:", height=300, placeholder="Ex: Analise este código e corrija erros...")
+    user_input = st.text_area("Descreva sua ideia, cole o código ou peça o incremento:", height=300, placeholder="Ex: [Cole seu código aqui] e escreva: 'Adicione uma função de envio de e-mail'...")
     upload = st.file_uploader("Upload de arquivo para análise", type=['py', 'js', 'html', 'txt', 'sql'])
 
 with col_out:
     st.subheader("🚀 Resultado da IA Personalizada")
     if st.button("EXECUTAR ANÁLISE GLOBAL"):
         if user_input:
-            with st.spinner("Nexus acessando bases globais para correção..."):
+            with st.spinner("Nexus acessando bases globais para a evolução do código..."):
                 contexto = ""
                 try:
                     with DDGS() as ddgs:
-                        search_results = [r['body'] for r in ddgs.text(f"soluções técnicas para: {user_input}", max_results=3)]
+                        search_results = [r['body'] for r in ddgs.text(f"melhores práticas e funções para: {user_input}", max_results=2)]
                         contexto = "\n".join(search_results)
                 except:
-                    contexto = "Usando base interna de segurança."
+                    contexto = "Usando base interna."
 
                 resultado_final = nexus_process(user_input, modo, contexto)
                 st.markdown(resultado_final)
@@ -113,6 +114,6 @@ with col_out:
 # --- BIBLIOTECA DE COMANDOS ---
 st.divider()
 with st.expander("📚 Biblioteca de Comandos Copie e Cole"):
-    st.code("Nexus, aja como minha IA personalizada e crie um sistema para o GitLab.")
-    st.code("Analise este código e gere uma versão aprimorada sem erros.")
+    st.code("Nexus, use o Incremento Mágico para adicionar um sistema de login neste código.")
+    st.code("Nexus, analise este código e gere uma versão aprimorada sem erros.")
     st.code("Crie uma automação que leia arquivos e faça upload para o Azure.")
