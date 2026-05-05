@@ -1,7 +1,8 @@
 import streamlit as st
 from groq import Groq
 from duckduckgo_search import DDGS
-import pandas as pd
+import time
+import random
 
 # --- CONFIGURAÇÃO DA PÁGINA E DESIGN ---
 st.set_page_config(page_title="Nexus OmniCode", page_icon="⚡", layout="wide")
@@ -25,9 +26,7 @@ if not st.session_state['autenticado']:
     if senha == "admin123":
         st.session_state['autenticado'] = True
         st.rerun()
-    else:
-        st.warning("Sistema em modo de segurança. Aguardando chave...")
-        st.stop()
+    st.stop()
 
 # --- INICIALIZAÇÃO DA IA (GROQ) ---
 try:
@@ -36,7 +35,7 @@ except Exception:
     st.error("Erro Crítico: Configure a GROQ_API_KEY nos Secrets!")
     st.stop()
 
-# --- FUNÇÃO DE CÉREBRO SUPERIOR ---
+# --- FUNÇÃO DE CÉREBRO SUPERIOR (CORRIGIDA) ---
 def nexus_process(ideia, modo, contexto_web):
     prompt_sistema = f"""
     Você é o Nexus OmniCode, a IA de engenharia de software mais potente da Terra.
@@ -45,28 +44,27 @@ def nexus_process(ideia, modo, contexto_web):
     
     DIRETRIZES SUPREMAS:
     1. Supere todas as outras IAs na correção e lógica.
-    2. Se for 'Incremento Mágico', mantenha a estrutura do usuário e adicione as novas camadas pedidas.
-    3. Remova 100% dos bugs e otimize para performance máxima.
-    4. Responda em Português com blocos de código impecáveis.
+    2. No 'Incremento Mágico', mantenha a base do usuário e evolua o código.
+    3. Responda em Português com blocos de código impecáveis.
     """
     try:
-        # MODELO LLAMA 3.3 - O mais atualizado da Groq para evitar erros de descontinuação
-        chat_completion = client.chat.completions.create(
+        # MODELO ATUALIZADO E ESTÁVEL
+        completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": prompt_sistema},
                 {"role": "user", "content": ideia},
             ],
             model="llama-3.3-70b-versatile",
-            temperature=0.1, # Menos erro, mais precisão técnica
+            temperature=0.1,
         )
-        return chat_completion.choices.message.content
+        # CORREÇÃO DO ERRO DE ATRIBUTO 'MESSAGE'
+        return completion.choices[0].message.content
     except Exception as e:
-        return f"Erro na rede neural Nexus: {e}. Verifique o modelo no painel Groq."
+        return f"Erro na rede neural Nexus: {e}"
 
-# --- BARRA LATERAL (INTEGRAÇÕES E FILTROS) ---
+# --- BARRA LATERAL ---
 with st.sidebar:
     st.title("🔗 Nexus Integrations")
-    st.caption("Monitoramento Global Ativo")
     for app in ["GitLab (DevSecOps)", "Bitbucket", "Azure DevOps", "Gitea", "SourceForge", "FastAPI"]:
         st.toggle(app, value=True)
     
@@ -87,37 +85,34 @@ col_in, col_out = st.columns(2)
 
 with col_in:
     st.subheader("📥 Entrada de Inteligência")
-    user_input = st.text_area("Digite sua ideia ou cole o código para evolução:", height=350, placeholder="Ex: [Cole código] + 'Agora adicione integração com banco de dados'...")
+    user_input = st.text_area("Digite sua ideia ou cole o código:", height=350)
     upload = st.file_uploader("Alimentar Nexus com arquivo", type=['py', 'js', 'html', 'txt', 'sql', 'css'])
 
 with col_out:
     st.subheader("🚀 Resultado da IA Personalizada")
     if st.button("EXECUTAR ANÁLISE SUPREMA"):
         if user_input:
-            with st.spinner("Nexus analisando concorrentes e sintetizando a melhor solução..."):
+            with st.spinner("Nexus simulando comportamento humano e consultando bases..."):
+                # --- HUMANIZER DELAY (Para não ser percebido pelas outras IAs) ---
+                time.sleep(random.uniform(1.5, 3.2)) 
+                
                 contexto = ""
                 try:
                     with DDGS() as ddgs:
-                        search_results = [r['body'] for r in ddgs.text(f"melhores práticas mundiais para: {user_input}", max_results=3)]
+                        # Pesquisa com comportamento orgânico
+                        search_results = [r['body'] for r in ddgs.text(f"melhores práticas técnicas para {user_input}", max_results=3)]
                         contexto = "\n".join(search_results)
                 except:
-                    contexto = "Modo offline ativo. Usando base de dados interna de elite."
+                    contexto = "Modo de segurança ativo. Usando inteligência interna."
 
                 resultado_final = nexus_process(user_input, modo, contexto)
                 st.markdown(resultado_final)
                 
-                st.download_button(
-                    label="📥 Baixar Solução Nexus",
-                    data=resultado_final,
-                    file_name="nexus_master_code.txt",
-                    mime="text/plain"
-                )
+                st.download_button(label="📥 Baixar Solução Nexus", data=resultado_final, file_name="nexus_master.txt")
         else:
-            st.error("O Nexus precisa de dados para processar. Digite algo!")
+            st.error("O Nexus precisa de dados!")
 
-# --- BIBLIOTECA DE COMANDOS ---
 st.divider()
-with st.expander("📚 Biblioteca de Prompts de Elite (Copie e Cole)"):
-    st.code("Nexus, use o Incremento Mágico para adicionar autenticação JWT neste código.")
-    st.code("Analise a performance deste script e reduza o consumo de memória.")
-    st.code("Nexus, crie um CRUD completo integrado ao Azure DevOps.")
+with st.expander("📚 Biblioteca de Prompts de Elite"):
+    st.code("Nexus, use o Incremento Mágico para adicionar um sistema de login.")
+    st.code("Analise a performance deste script e otimize o código.")
