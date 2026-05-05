@@ -31,7 +31,7 @@ if not st.session_state['autenticado']:
 # --- INICIALIZAÇÃO DA IA (GROQ) ---
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-except Exception as e:
+except Exception:
     st.error("Erro: Verifique sua GROQ_API_KEY nos Secrets do Streamlit!")
     st.stop()
 
@@ -39,29 +39,29 @@ except Exception as e:
 def nexus_process(ideia, modo, contexto_web):
     prompt_sistema = f"""
     Você é o Nexus OmniCode, a IA mais avançada do mundo. 
-    Sua missão: {modo}.
-    Analise estas respostas de outras IAs/Fontes: {contexto_web}
-    Corrija erros, remova bugs e gere um código aprimorado e profissional.
+    Sua missão atual: {modo}.
+    Considere estas informações externas: {contexto_web}
+    Corrija erros, otimize a lógica e entregue um código perfeito.
     Responda em Português com blocos de código formatados.
     """
     try:
+        # CORREÇÃO: Atualizado para o modelo 'llama-3.1-70b-versatile' (Versão mais atual e suportada)
         chat_completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": prompt_sistema},
                 {"role": "user", "content": ideia},
             ],
-            model="llama3-70b-8192",
+            model="llama-3.1-70b-versatile",
             temperature=0.2,
         )
         return chat_completion.choices.message.content
     except Exception as e:
-        return f"Erro no processamento da IA: {e}"
+        return f"Erro na conexão com a IA: {e}"
 
 # --- BARRA LATERAL (FILTROS E INTEGRAÇÕES) ---
 with st.sidebar:
     st.title("🔗 Nexus Integrations")
     st.subheader("Sistemas Monitorados")
-    # Mantendo todos os botões liga/desliga solicitados
     for app in ["GitLab (DevSecOps)", "Bitbucket", "Azure DevOps", "Gitea", "SourceForge", "FastAPI"]:
         st.toggle(app, value=True)
     
@@ -78,40 +78,37 @@ with st.sidebar:
 st.title("⚡ Nexus OmniCode")
 st.caption("Automação de Análise, Correção e Criação Universal")
 
-# CORREÇÃO AQUI: Definindo 2 colunas explicitamente
 col_in, col_out = st.columns(2)
 
 with col_in:
     st.subheader("📥 Entrada de Dados")
-    user_input = st.text_area("Descreva sua ideia ou cole o código aqui:", height=300, placeholder="Ex: Analise este código e corrija erros de segurança...")
+    user_input = st.text_area("Descreva sua ideia ou cole o código aqui:", height=300, placeholder="Ex: Analise este código e corrija erros...")
     upload = st.file_uploader("Upload de arquivo para análise", type=['py', 'js', 'html', 'txt', 'sql'])
 
 with col_out:
     st.subheader("🚀 Resultado da IA Personalizada")
     if st.button("EXECUTAR ANÁLISE GLOBAL"):
         if user_input:
-            with st.spinner("Nexus consultando bases mundiais e gerando código perfeito..."):
-                # Busca "Invisível" para alimentar a inteligência
+            with st.spinner("Nexus acessando bases globais para correção..."):
                 contexto = ""
                 try:
                     with DDGS() as ddgs:
-                        search_results = [r['body'] for r in ddgs.text(f"melhores soluções e bugs para: {user_input}", max_results=3)]
+                        search_results = [r['body'] for r in ddgs.text(f"melhores soluções para: {user_input}", max_results=3)]
                         contexto = "\n".join(search_results)
                 except:
-                    contexto = "Usando base interna de conhecimento."
+                    contexto = "Usando base interna."
 
-                # Geração do código aprimorado
                 resultado_final = nexus_process(user_input, modo, contexto)
                 st.markdown(resultado_final)
                 
                 st.download_button(
                     label="📥 Baixar Código Nexus",
                     data=resultado_final,
-                    file_name="nexus_optimized.txt",
+                    file_name="nexus_output.txt",
                     mime="text/plain"
                 )
         else:
-            st.error("O campo de entrada não pode estar vazio!")
+            st.error("O campo de entrada está vazio!")
 
 # --- BIBLIOTECA DE COMANDOS ---
 st.divider()
