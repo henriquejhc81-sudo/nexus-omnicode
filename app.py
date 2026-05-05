@@ -3,6 +3,9 @@ from groq import Groq
 from duckduckgo_search import DDGS
 import time
 import random
+import base64
+from PIL import Image
+import io
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Nexus OmniCode", page_icon="⚡", layout="wide")
@@ -39,12 +42,12 @@ def nexus_process(ideia, modo, contexto_web):
 with st.sidebar:
     st.title("⚙️ Painel Nexus")
     st.caption("Central de Automação Global")
-    
+
     st.divider()
     st.subheader("🔗 Integrações Ativas")
     for app in ["GitLab", "Bitbucket", "Azure", "Gitea", "SourceForge", "FastAPI"]:
         st.toggle(app, value=True)
-    
+
     st.divider()
     modo = st.selectbox("🎯 Função Principal", [
         "Criar código do zero", 
@@ -63,7 +66,16 @@ col_in, col_out = st.columns(2)
 with col_in:
     st.subheader("📥 Entrada")
     user_input = st.text_area("Descreva sua ideia ou cole o código:", height=300, placeholder="Ex: Crie um sistema de gestão de vendas...")
-    upload = st.file_uploader("Upload de arquivo para análise", type=['py', 'js', 'html', 'txt', 'sql', 'css'])
+    upload = st.file_uploader("Upload de arquivo para análise", type=None)
+
+    if upload is not None:
+        if upload.type == 'image/jpeg' or upload.type == 'image/png':
+            img = Image.open(io.BytesIO(upload.read()))
+            st.image(img)
+        elif upload.type == 'text/plain':
+            st.write(upload.read().decode('utf-8'))
+        else:
+            st.write("Arquivo não suportado")
 
 with col_out:
     st.subheader("🚀 Resultado da IA")
@@ -77,8 +89,21 @@ with col_out:
                         contexto = "\n".join(search)
                 except:
                     contexto = "Usando inteligência interna."
-                
+
                 resultado = nexus_process(user_input, modo, contexto)
+                st.session_state['last_result'] = resultado
+                st.markdown(resultado)
+        elif upload is not None:
+            with st.spinner("Nexus simulando humano e processando bases globais..."):
+                time.sleep(random.uniform(0.5, 1.5))
+                try:
+                    with DDGS() as ddgs:
+                        search = [r['body'] for r in ddgs.text(f"melhores práticas para {upload.name}", max_results=2)]
+                        contexto = "\n".join(search)
+                except:
+                    contexto = "Usando inteligência interna."
+
+                resultado = nexus_process(upload.name, modo, contexto)
                 st.session_state['last_result'] = resultado
                 st.markdown(resultado)
         else:
@@ -89,9 +114,9 @@ with col_out:
         st.divider()
         st.subheader("💾 Opções de Download")
         formato = st.selectbox("Escolha o formato do arquivo:", [".py", ".js", ".html", ".txt", ".sql", ".css"])
-        
+
         mimes = {".py": "text/x-python", ".js": "text/javascript", ".html": "text/html", ".txt": "text/plain", ".sql": "text/x-sql", ".css": "text/css"}
-        
+
         st.download_button(
             label=f"📥 BAIXAR COMO {formato.upper()}",
             data=st.session_state['last_result'],
