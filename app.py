@@ -40,18 +40,18 @@ def nexus_process(ideia, modo, contexto_web):
     prompt_sistema = f"""
     Você é o Nexus OmniCode, a IA mais avançada do mundo. 
     Sua missão atual: {modo}.
-    Considere estas informações externas: {contexto_web}
-    Corrija erros, otimize a lógica e entregue um código perfeito.
+    Considere estas informações externas coletadas: {contexto_web}
+    Corrija erros, otimize a lógica e entregue um código perfeito e profissional.
     Responda em Português com blocos de código formatados.
     """
     try:
-        # CORREÇÃO: Atualizado para o modelo 'llama-3.1-70b-versatile' (Versão mais atual e suportada)
+        # CORREÇÃO DEFINITIVA: Usando o modelo atualizado llama-3.3-7b-versatile
         chat_completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": prompt_sistema},
                 {"role": "user", "content": ideia},
             ],
-            model="llama-3.1-70b-versatile",
+            model="llama-3.3-7b-specdec", # Modelo ultra veloz e atualizado
             temperature=0.2,
         )
         return chat_completion.choices.message.content
@@ -93,10 +93,10 @@ with col_out:
                 contexto = ""
                 try:
                     with DDGS() as ddgs:
-                        search_results = [r['body'] for r in ddgs.text(f"melhores soluções para: {user_input}", max_results=3)]
+                        search_results = [r['body'] for r in ddgs.text(f"soluções técnicas para: {user_input}", max_results=3)]
                         contexto = "\n".join(search_results)
                 except:
-                    contexto = "Usando base interna."
+                    contexto = "Usando base interna de segurança."
 
                 resultado_final = nexus_process(user_input, modo, contexto)
                 st.markdown(resultado_final)
