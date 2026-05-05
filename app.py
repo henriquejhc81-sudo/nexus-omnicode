@@ -15,7 +15,7 @@ if 'lock_active' not in st.session_state:
 if 'autenticado' not in st.session_state:
     st.session_state['autenticado'] = False
 
-# --- CSS PARA BLINDAGEM (ESCONDE TUDO ANTES DO LOGIN) ---
+# --- BLINDAGEM CSS (ESCONDE TUDO SE NÃO ESTIVER LOGADO) ---
 if st.session_state['lock_active'] and not st.session_state['autenticado']:
     st.markdown("""
         <style>
@@ -25,14 +25,16 @@ if st.session_state['lock_active'] and not st.session_state['autenticado']:
         """, unsafe_allow_html=True)
     
     st.title("🔒 Nexus Blindado")
-    entrada_senha = st.text_input("Insira a Chave Mestra para acessar o sistema:", type="password")
+    st.caption("Acesso restrito ao sistema de inteligência universal.")
+    entrada_senha = st.text_input("Insira a Chave Mestra para acessar:", type="password")
+    
     if st.button("Desbloquear Nexus"):
         if entrada_senha == st.session_state['master_password']:
             st.session_state['autenticado'] = True
             st.rerun()
         else:
             st.error("Senha Incorreta! Acesso Negado.")
-    st.stop() # NADA além daqui é carregado sem a senha
+    st.stop() # NADA além daqui é carregado sem a senha correta
 
 # --- ESTILO INTERFACE LOGADA ---
 st.markdown("""
@@ -47,11 +49,11 @@ st.markdown("""
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except:
-    st.error("Erro: Verifique sua chave API nos Secrets do Streamlit!")
+    st.error("Erro: API Key não encontrada nos Secrets!")
     st.stop()
 
 def nexus_process(ideia, modo, contexto_web):
-    prompt_sistema = f"Você é o Nexus OmniCode, a IA mais potente da Terra. Missão: {modo}. Contexto: {contexto_web}. Responda em Português com código profissional completo."
+    prompt_sistema = f"Você é o Nexus OmniCode. Missão: {modo}. Contexto: {contexto_web}. Responda em Português com código profissional completo."
     try:
         completion = client.chat.completions.create(
             messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": ideia}],
@@ -62,16 +64,16 @@ def nexus_process(ideia, modo, contexto_web):
     except Exception as e:
         return f"Erro na conexão com a IA: {e}"
 
-# --- BARRA LATERAL (PROTEGIDA E SÓ PARA AUTORIZADOS) ---
+# --- BARRA LATERAL (PROTEGIDA) ---
 with st.sidebar:
     st.title("⚙️ Painel Nexus")
     
     with st.expander("🔐 Gestão de Segurança", expanded=False):
-        st.session_state['lock_active'] = st.toggle("Ativar Bloqueio", value=st.session_state['lock_active'])
+        st.session_state['lock_active'] = st.toggle("Bloqueio Ativo", value=st.session_state['lock_active'])
         nova_senha = st.text_input("Mudar Senha Mestra:", value=st.session_state['master_password'], type="password")
         if st.button("Salvar Nova Senha"):
             st.session_state['master_password'] = nova_senha
-            st.success("Senha atualizada!")
+            st.success("Senha alterada!")
 
     st.divider()
     st.subheader("🔗 Integrações")
@@ -89,47 +91,47 @@ with st.sidebar:
 
 # --- ÁREA PRINCIPAL ---
 st.title("⚡ Nexus OmniCode")
-st.caption("Central Suprema de Inteligência em Código")
+st.caption("Central Suprema de Inteligência em Código - Projeto Melhor do Mundo")
 
 col_in, col_out = st.columns(2)
 
 with col_in:
     st.subheader("📥 Entrada")
     user_input = st.text_area("Descreva sua ideia ou cole o código:", height=300)
-    upload = st.file_uploader("Upload de arquivo", type=['py', 'js', 'html', 'txt', 'sql', 'css'])
+    upload = st.file_uploader("Upload de arquivo para análise", type=['py', 'js', 'html', 'txt', 'sql', 'css'])
 
 with col_out:
     st.subheader("🚀 Resultado")
     if st.button("EXECUTAR ANÁLISE SUPREMA"):
         if user_input:
-            with st.spinner("Nexus emulando humano e processando..."):
-                time.sleep(random.uniform(1.0, 2.0))
+            with st.spinner("Nexus simulando comportamento humano e processando..."):
+                time.sleep(random.uniform(1.0, 2.5))
                 try:
                     with DDGS() as ddgs:
                         search = [r['body'] for r in ddgs.text(f"melhores práticas: {user_input}", max_results=2)]
                         contexto = "\n".join(search)
                 except:
-                    contexto = "Base interna ativa."
+                    contexto = "Usando inteligência interna."
                 
                 resultado = nexus_process(user_input, modo, contexto)
                 st.session_state['last_result'] = resultado
                 st.markdown(resultado)
         else:
-            st.error("Digite algo para o Nexus processar!")
+            st.error("O campo de entrada está vazio!")
 
-    # BOTÃO DE DOWNLOAD (CORRIGIDO)
+    # BOTÃO DE DOWNLOAD (CORRIGIDO PARA ACESSO IMEDIATO)
     if 'last_result' in st.session_state:
         st.download_button(
-            label="📥 BAIXAR SOLUÇÃO AGORA",
+            label="📥 BAIXAR CÓDIGO FONTE",
             data=st.session_state['last_result'],
             file_name="nexus_output.py",
             mime="text/x-python"
         )
 
-# --- CHAT PRO ---
+# --- NEXUS CHAT PRO ---
 st.divider()
 st.subheader("💬 Nexus Chat Pro")
-chat_input = st.text_input("Dúvida sobre o código gerado?")
+chat_input = st.text_input("Dúvida sobre o código gerado acima?")
 if chat_input and 'last_result' in st.session_state:
     with st.chat_message("assistant"):
         resposta_chat = nexus_process(f"Sobre este código: {st.session_state['last_result']}. Pergunta: {chat_input}", "Suporte Chat", "")
