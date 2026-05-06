@@ -5,7 +5,7 @@ import time
 import random
 
 # --- CONFIGURAÇÃO DA PÁGINA E DESIGN CYBER-SENTINEL ---
-st.set_page_config(page_title="Nexus Sentinel v5.3", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="Nexus Sentinel v5.4", page_icon="🛡️", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,27 +23,27 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- MOTOR DE IA COM BLINDAGEM ANTI-ERRO 429 ---
+# --- MOTOR DE IA COM BLINDAGEM E AUTOCORREÇÃO ---
 def nexus_agent_call(prompt, modo, contexto):
     try:
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
     except:
         return "Erro: Chave API ausente nos Secrets!"
         
-    max_retries = 5 # Aumentado para maior persistência
+    max_retries = 5
     for attempt in range(max_retries):
         try:
+            # DIRETRIZ REORGANIZADA PARA FOCO EM CORREÇÃO AUTOMÁTICA
             prompt_sistema = f"""
-            Você é o Nexus Sentinel 5.3. Missão: {modo}.
-            DIRETRIZ OBRIGATÓRIA: Em QUALQUER projeto, inclua um '🛡️ MÓDULO DE SEGURANÇA' com Logs de Invasão e proteção contra intrusos.
+            Você é o Nexus Sentinel 5.4. Missão: {modo}.
             
-            MODO ARQUITETO:
-            1. '🛠️ SETUP'
-            2. '📁 ESTRUTURA'
-            3. '🚀 CÓDIGO COMPLETO'
-            
-            Responda em Português.
+            REGRAS DE OURO:
+            1. Se o modo for 'Varredura e Autocorreção', identifique TODOS os erros e gere o código 100% corrigido.
+            2. Em QUALQUER projeto, inclua Módulo de Segurança e Logs de Invasão.
+            3. Aplique Self-Healing (try/catch) em funções críticas.
+            4. Responda com Guia de Setup, Estrutura de Pastas e Código Completo.
             """
+            
             completion = client.chat.completions.create(
                 messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
@@ -52,26 +52,24 @@ def nexus_agent_call(prompt, modo, contexto):
             return completion.choices[0].message.content
             
         except Exception as e:
-            error_msg = str(e)
-            if "429" in error_msg:
-                # ESTRATÉGIA ANTI-BLOQUEIO: Espera progressiva
+            if "429" in str(e):
                 wait_time = (attempt + 1) * 8 
-                st.warning(f"🛡️ Nexus detectou Limite de Cota (429). Ativando Auto-Healing... Aguarde {wait_time}s")
+                st.warning(f"🛡️ Auto-Healing Anti-429: Aguardando {wait_time}s para sincronizar...")
                 time.sleep(wait_time)
             else:
-                return f"Erro Crítico no Sentinel: {e}"
-    return "O Nexus não conseguiu furar o bloqueio da API após 5 tentativas. Tente reduzir o tamanho do pedido."
+                return f"Erro Crítico: {e}"
+    return "O Sentinel não pôde furar o bloqueio após 5 tentativas."
 
-# --- BARRA LATERAL (ESTRUTURA MANTIDA) ---
+# --- BARRA LATERAL REORGANIZADA ---
 with st.sidebar:
     st.title("🛡️ Nexus Sentinel")
-    st.caption("v5.3 | Anti-Lock Mode")
+    st.caption("v5.4 | Elite Intelligence")
     
     st.divider()
-    with st.expander("🚀 Superpoderes Ativos", expanded=True):
-        st.toggle("Segurança Nativa em Tudo", value=True)
+    with st.expander("🚀 Superpoderes Sentinel", expanded=True):
+        st.toggle("Segurança Nativa", value=True)
         st.toggle("Auto-Healing Anti-429", value=True)
-        st.toggle("Modo Arquiteto", value=True)
+        st.toggle("Modo Arquiteto Ativo", value=True)
         st.toggle("Live Preview", value=True)
 
     st.divider()
@@ -79,59 +77,62 @@ with st.sidebar:
     for app in ["GitLab", "GitHub", "Azure DevOps", "Slack/Notion"]:
         st.toggle(app, value=True)
     
+    # NOVA FUNÇÃO DE VARREDURA ADICIONADA
     modo = st.selectbox("🎯 Modo do Agente", [
+        "Varredura e Autocorreção Automática",
         "Projeto do Zero (Modo Arquiteto)",
-        "Incremento Mágico + Testes",
-        "Análise de Vulnerabilidades",
-        "Design-to-Code"
+        "Incremento Mágico + Segurança",
+        "Análise de Vulnerabilidades (Snyk)",
+        "Design-to-Code Cyber Neon"
     ])
 
 # --- ÁREA PRINCIPAL ---
 st.title("⚡ Nexus OmniCode Sentinel")
-st.markdown("<div class='status-box'><b>STATUS:</b> PROTEGIDO | <b>ANTI-429:</b> ATIVO | <b>SEGURANÇA:</b> INTEGRAL</div>", unsafe_allow_html=True)
+st.markdown("<div class='status-box'><b>SENTINEL:</b> VIGILANTE | <b>AUTO-HEALING:</b> ATIVO | <b>VARREDURA:</b> LIGADA</div>", unsafe_allow_html=True)
 
 col_in, col_out = st.columns([1, 1.2])
 
 with col_in:
-    st.subheader("📥 Missão")
-    user_input = st.text_area("Descreva seu projeto (Segurança incluída automaticamente):", height=300)
-    upload = st.file_uploader("Contexto (Opcional)", accept_multiple_files=True)
+    st.subheader("📥 Entrada de Missão")
+    user_input = st.text_area("Cole seu código com erro ou descreva sua ideia:", height=300)
+    upload = st.file_uploader("Contexto Adicional", accept_multiple_files=True)
 
 with col_out:
-    st.subheader("🚀 Entrega Sentinel")
+    st.subheader("🚀 Resposta do Sentinel")
     if st.button("ATIVAR NEXUS SENTINEL"):
         if user_input:
-            with st.spinner("Sentinel rompendo bloqueios de cota e processando..."):
+            with st.spinner("Sentinel realizando varredura e gerando blindagem..."):
                 try:
                     with DDGS() as ddgs:
-                        busca = [r['body'] for r in ddgs.text(f"security architecture for {user_input}", max_results=2)]
+                        busca = [r['body'] for r in ddgs.text(f"security and debugging best practices for {user_input}", max_results=2)]
                         contexto = "\n".join(busca)
                 except:
-                    contexto = "Base interna de elite."
+                    contexto = "Usando base interna de elite."
                 
                 resultado = nexus_agent_call(user_input, modo, contexto)
                 st.session_state['last_result'] = resultado
         else:
-            st.error("Diga ao Nexus o que construir.")
+            st.error("O Sentinel aguarda seus dados.")
 
     if 'last_result' in st.session_state:
-        resultado = st.session_state['last_result']
+        res = st.session_state['last_result']
         tab1, tab2 = st.tabs(["💻 Plano e Código", "🖼️ Live Preview"])
         with tab1:
-            st.markdown(resultado)
+            st.markdown(res)
         with tab2:
-            if "<html>" in resultado.lower() or "<!doctype html>" in resultado.lower():
-                st.components.v1.html(resultado, height=500, scrolling=True)
+            if "<html>" in res.lower() or "<!doctype html>" in res.lower():
+                st.components.v1.html(res, height=500, scrolling=True)
             else:
-                st.info("Aguardando código HTML...")
+                st.info("O Live Preview aguarda código HTML.")
 
         st.divider()
-        formato_ext = st.selectbox("Formato:", [".py", ".html", ".js", ".txt"], key="f_selector")
-        st.download_button(label=f"BAIXAR PROJETO ({formato_ext})", data=resultado, file_name=f"nexus_sentinel_v53{formato_ext}")
+        ext = st.selectbox("Formato:", [".py", ".html", ".js", ".txt"], key="fmt")
+        st.download_button(label=f"BAIXAR PROJETO ({ext})", data=res, file_name=f"nexus_sentinel_v54{ext}")
 
+# --- CHAT SUPORTE ---
 st.divider()
-st.subheader("💬 Nexus Sentinel Chat")
-chat_input = st.text_input("Dúvida? Pergunte aqui:")
+st.subheader("💬 Nexus Sentinel Chat Pro")
+chat_input = st.text_input("Dúvida técnica ou pedido de ajuste?")
 if chat_input and 'last_result' in st.session_state:
     with st.chat_message("assistant"):
-        st.markdown(nexus_agent_call(f"Sobre o projeto: {st.session_state['last_result']}. Pergunta: {chat_input}", "Chat Suporte", ""))
+        st.markdown(nexus_agent_call(f"Contexto: {st.session_state['last_result']}. Pergunta: {chat_input}", "Chat Suporte", ""))
