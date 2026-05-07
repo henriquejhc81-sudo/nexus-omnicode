@@ -24,63 +24,52 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- MOTOR NEURAL COM SIMULAÇÃO ADVERSÁRIA (ANTI-LOCK 429) ---
+# --- MOTOR NEURAL COM CORREÇÃO DE ATRIBUTO E SIMULAÇÃO ADVERSÁRIA ---
 def nexus_adversary_brain(prompt, modo, contexto, dna_ativo, adversary_ativo):
     try:
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
     except:
-        return "⚠️ Erro Crítico: Motor Neural sem Chave API!"
+        return "⚠️ Erro Crítico: Chave API ausente!"
         
     for attempt in range(5):
         try:
             time.sleep(random.uniform(0.5, 1.5)) 
             
-            # Construção do DNA e Lógica Adversária
             dna_prompt = "INJEÇÃO DNA NEXUS ATIVA: Motor Neural, Ghost AI e Segurança Integral." if dna_ativo else ""
             adversary_prompt = ""
             if adversary_ativo:
                 adversary_prompt = """
                 ALERTA: SIMULAÇÃO ADVERSÁRIA ATIVA.
-                Analise e proteja o código contra:
-                1. Predição Probabilística (GANs/PassGAN): Use hashing complexo.
-                2. Infostealers (Malware Exfiltration): Bloqueie extração de arquivos Login Data/Cookies.
-                3. Phishing de Precisão (Evilginx2): Implemente headers anti-Mitm e anti-clonagem.
-                4. Credential Stuffing: Adicione Rate Limiting e detecção de Headless Browsers.
+                Proteja contra: 1. Predição (GANs), 2. Infostealers, 3. Phishing (Evilginx2), 4. Credential Stuffing.
                 """
 
-            prompt_sistema = f"""
-            Você é o Nexus Sentinel 5.8. MISSÃO: {modo}.
-            {dna_prompt}
-            {adversary_prompt}
-            CONDIÇÕES GHOST: Invisibilidade e Human-Mimic Research.
-            CONTEXTO: {contexto}.
-            """
+            prompt_sistema = f"Você é o Nexus Sentinel 5.8. MISSÃO: {modo}. {dna_prompt} {adversary_prompt} CONTEXTO: {contexto}."
             
             completion = client.chat.completions.create(
                 messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
                 temperature=0.2,
             )
-            return completion.choices.message.content
+            # CORREÇÃO DEFINITIVA PARA EVITAR O ERRO 'list' object
+            return completion.choices[0].message.content
             
         except Exception as e:
             if "429" in str(e):
                 wait = (attempt + 1) * 8
-                st.warning(f"🛡️ Healer Engine: Sincronizando rota adversária em {wait}s...")
+                st.warning(f"🛡️ Healer Engine: Reconectando em {wait}s...")
                 time.sleep(wait)
             else:
                 return f"Falha no Motor Adversário: {e}"
     return "Sentinel Offline após falhas de sincronização."
 
-# --- BARRA LATERAL (COMMAND & CONTROL) ---
+# --- BARRA LATERAL ---
 with st.sidebar:
     st.title("🛡️ NEXUS SENTINEL")
     st.caption("v5.8 | ADVERSARY PRO")
     
     with st.expander("🧬 DNA & Adversário", expanded=True):
         dna_ativo = st.toggle("Injetar DNA Nexus", value=True)
-        # NOVO BOTÃO DE SIMULAÇÃO ADVERSÁRIA
-        adversary_ativo = st.toggle("Simulação Adversária", value=True, help="Testa o código contra GANs, Infostealers e Phishing de Elite.")
+        adversary_ativo = st.toggle("Simulação Adversária", value=True)
         st.toggle("Human-Mimic Mode", value=True)
 
     st.divider()
@@ -98,35 +87,31 @@ with st.sidebar:
 
 # --- ÁREA PRINCIPAL ---
 st.title("⚡ Nexus Sentinel v5.8")
-st.markdown(f"""
-<div class='status-box'>
-    <b>STATUS:</b> VIGILANTE | <b>ADVERSÁRIO:</b> {'SIMULAÇÃO ATIVA' if adversary_ativo else 'OFF'} | <b>DNA:</b> {'INJETADO' if dna_ativo else 'OFF'}
-</div>
-""", unsafe_allow_html=True)
+st.markdown(f"<div class='status-box'><b>STATUS:</b> VIGILANTE | <b>ADVERSÁRIO:</b> {'ATIVA' if adversary_ativo else 'OFF'} | <b>DNA:</b> {'INJETADO' if dna_ativo else 'OFF'}</div>", unsafe_allow_html=True)
 
 col_in, col_out = st.columns([1, 1.2])
 
 with col_in:
-    st.subheader("📥 Neural Sniper Input")
-    user_input = st.text_area("Descreva o projeto (A proteção adversária será aplicada):", height=300)
-    upload = st.file_uploader("Upload de Base de Dados/Código", accept_multiple_files=True)
+    st.subheader("📥 Missão Sniper")
+    user_input = st.text_area("Descreva o projeto (A blindagem adversária será aplicada):", height=300)
+    upload = st.file_uploader("Upload de Contexto", accept_multiple_files=True)
 
 with col_out:
     st.subheader("🚀 Resposta Mestra Adversária")
     if st.button("ATIVAR NEXUS SENTINEL"):
         if user_input:
-            with st.spinner("Motor Adversário simulando ataques de elite e gerando blindagem..."):
+            with st.spinner("Motor Adversário simulando ataques e gerando blindagem..."):
                 try:
                     with DDGS() as ddgs:
-                        busca = [r['body'] for r in ddgs.text(f"cybersecurity threats 2026: {user_input}", max_results=3)]
+                        busca = [r['body'] for r in ddgs.text(f"cybersecurity best practices 2026: {user_input}", max_results=2)]
                         contexto = "\n".join(busca)
                 except:
-                    contexto = "Usando Historic Learning interno."
+                    contexto = "Base interna ativa."
                 
                 resultado = nexus_adversary_brain(user_input, modo, contexto, dna_ativo, adversary_ativo)
                 st.session_state['last_result'] = resultado
         else:
-            st.error("O Sentinel aguarda seu comando.")
+            st.error("Insira o alvo da missão.")
 
     if 'last_result' in st.session_state:
         res = st.session_state['last_result']
@@ -141,12 +126,12 @@ with col_out:
 
         st.divider()
         ext = st.selectbox("Exportar como:", [".html", ".py", ".docx", ".txt"])
-        st.download_button(label=f"📥 BAIXAR PROJETO ADVERSÁRIO ({ext})", data=res, file_name=f"nexus_adversary_report{ext}")
+        st.download_button(label=f"📥 BAIXAR PROJETO ({ext})", data=res, file_name=f"nexus_adversary_output{ext}")
 
 # --- CHAT ---
 st.divider()
-st.subheader("💬 Nexus Ghost Chat (Adversary Context)")
-chat_input = st.text_input("Dúvida técnica sobre a predição probabilística ou infostealers?")
+st.subheader("💬 Nexus Ghost Chat")
+chat_input = st.text_input("Dúvida sobre a proteção adversária?")
 if chat_input and 'last_result' in st.session_state:
     with st.chat_message("assistant"):
-        st.markdown(nexus_adversary_brain(f"Contexto: {st.session_state['last_result']}. Pergunta: {chat_input}", "Chat Support", "", dna_ativo, adversary_ativo))
+        st.markdown(nexus_adversary_brain(f"Sobre este projeto: {st.session_state['last_result']}. Pergunta: {chat_input}", "Chat Support", "", dna_ativo, adversary_ativo))
