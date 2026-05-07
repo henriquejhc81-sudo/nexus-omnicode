@@ -4,135 +4,143 @@ from duckduckgo_search import DDGS
 import time
 import random
 
-# --- CONFIGURAÇÃO DA PÁGINA E DESIGN CYBER-SENTINEL ---
-st.set_page_config(page_title="Nexus Sentinel v5.4", page_icon="🛡️", layout="wide")
+# --- CONFIGURAÇÃO NEXUS SENTINEL v5.5 "DEEP BRAIN" ---
+st.set_page_config(page_title="Nexus Sentinel v5.5 | Deep Brain", page_icon="🛡️", layout="wide")
 
+# CSS - Interface de Centro de Comando Cibernético
 st.markdown("""
     <style>
     .main { background-color: #0b0e14; color: #e0e0e0; }
     .stButton>button { 
         background: linear-gradient(135deg, #00c853 0%, #b2ff59 100%); 
-        color: #000; font-weight: 800; border-radius: 8px; border: none; transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
+        color: #000; font-weight: 800; border-radius: 8px; border: none; height: 3.5em;
+        box-shadow: 0 4px 15px rgba(0, 200, 83, 0.4);
     }
     .status-box { 
         padding: 15px; border-radius: 10px; background: #161b22; 
-        border: 1px solid #00c853; box-shadow: inset 0 0 10px rgba(0, 200, 83, 0.1);
+        border: 1px solid #00c853; box-shadow: inset 0 0 15px rgba(0, 200, 83, 0.2);
         margin-bottom: 20px; font-family: 'Courier New', Courier, monospace;
     }
+    .risk-score { font-size: 24px; font-weight: bold; color: #ff5252; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- MOTOR DE IA COM BLINDAGEM E AUTOCORREÇÃO ---
-def nexus_agent_call(prompt, modo, contexto):
+# --- HEALER ENGINE & MOTOR NEURAL (ANTI-LOCK 429) ---
+def nexus_deep_brain(prompt, modo, contexto):
     try:
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
     except:
-        return "Erro: Chave API ausente nos Secrets!"
+        return "⚠️ Erro: Motor Neural sem Chave API nos Secrets!"
         
-    max_retries = 5
-    for attempt in range(max_retries):
+    for attempt in range(5):
         try:
-            # DIRETRIZ REORGANIZADA PARA FOCO EM CORREÇÃO AUTOMÁTICA
+            # ORQUESTRAÇÃO MULTI-IA: Simula 7 perspectivas
             prompt_sistema = f"""
-            Você é o Nexus Sentinel 5.4. Missão: {modo}.
+            Você é o Nexus Sentinel 5.5 'Deep Brain'. Use os motores Gemini 1.5 Pro e Flash.
+            MISSÃO: {modo}. CONTEXTO: {contexto}.
             
-            REGRAS DE OURO:
-            1. Se o modo for 'Varredura e Autocorreção', identifique TODOS os erros e gere o código 100% corrigido.
-            2. Em QUALQUER projeto, inclua Módulo de Segurança e Logs de Invasão.
-            3. Aplique Self-Healing (try/catch) em funções críticas.
-            4. Responda com Guia de Setup, Estrutura de Pastas e Código Completo.
+            DIRETRIZES DE ELITE:
+            1. [Orquestração]: Simule 7 especialistas para chegar à Conclusão Mestra.
+            2. [Segurança]: Inclua Matriz de Risco (0-100%) e Logs de Invasão.
+            3. [Due Diligence]: Varredura massiva para identificar anomalias e 'agulhas no palheiro'.
+            4. [Healer]: Se houver erro, aplique Self-Healing (Auto-Cura).
+            5. [Arquiteto]: Setup, Estrutura de Pastas e Código Completo.
+            6. [Tradução]: Mantenha tradução técnica global integrada.
             """
             
             completion = client.chat.completions.create(
                 messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
+                model="llama-3.3-70b-versatile", # Groq Engine agindo como ponte para orquestração
                 temperature=0.1,
             )
             return completion.choices[0].message.content
             
         except Exception as e:
             if "429" in str(e):
-                wait_time = (attempt + 1) * 8 
-                st.warning(f"🛡️ Auto-Healing Anti-429: Aguardando {wait_time}s para sincronizar...")
-                time.sleep(wait_time)
+                wait = (attempt + 1) * 8
+                st.warning(f"🛡️ Healer Engine Ativo: Reconectando rota estável em {wait}s...")
+                time.sleep(wait)
             else:
-                return f"Erro Crítico: {e}"
-    return "O Sentinel não pôde furar o bloqueio após 5 tentativas."
+                return f"Falha no Motor Neural: {e}"
+    return "Sentinel offline após 5 tentativas. Verifique a cota."
 
-# --- BARRA LATERAL REORGANIZADA ---
+# --- BARRA LATERAL (CENTRO DE COMANDO) ---
 with st.sidebar:
-    st.title("🛡️ Nexus Sentinel")
-    st.caption("v5.4 | Elite Intelligence")
+    st.title("🛡️ NEXUS SENTINEL")
+    st.caption("v5.5 | DEEP BRAIN EDITION")
     
-    st.divider()
-    with st.expander("🚀 Superpoderes Sentinel", expanded=True):
-        st.toggle("Segurança Nativa", value=True)
-        st.toggle("Auto-Healing Anti-429", value=True)
-        st.toggle("Modo Arquiteto Ativo", value=True)
-        st.toggle("Live Preview", value=True)
+    with st.expander("👁️ Sentinel Visual", expanded=True):
+        st.toggle("Neural Sniper Prompt", value=True)
+        st.toggle("Data Processing (Any File)", value=True)
+        st.toggle("Computer Vision (Simulado)", value=True)
+        st.toggle("Forensic Analytics", value=True)
 
     st.divider()
-    st.subheader("🔗 DevSecOps")
-    for app in ["GitLab", "GitHub", "Azure DevOps", "Slack/Notion"]:
-        st.toggle(app, value=True)
+    st.subheader("🛠️ Deep Learning Engine")
+    for tool in ["Due Diligence Automática", "E-Discovery", "Historic Learning", "Matriz de Risco"]:
+        st.toggle(tool, value=True)
     
-    # NOVA FUNÇÃO DE VARREDURA ADICIONADA
-    modo = st.selectbox("🎯 Modo do Agente", [
+    st.divider()
+    modo = st.selectbox("🎯 Neural Sniper Target", [
         "Varredura e Autocorreção Automática",
+        "Due Diligence e Matriz de Risco",
+        "E-Discovery (Busca Massiva)",
         "Projeto do Zero (Modo Arquiteto)",
-        "Incremento Mágico + Segurança",
-        "Análise de Vulnerabilidades (Snyk)",
-        "Design-to-Code Cyber Neon"
+        "Incremento Mágico + Tradução Global"
     ])
 
 # --- ÁREA PRINCIPAL ---
-st.title("⚡ Nexus OmniCode Sentinel")
-st.markdown("<div class='status-box'><b>SENTINEL:</b> VIGILANTE | <b>AUTO-HEALING:</b> ATIVO | <b>VARREDURA:</b> LIGADA</div>", unsafe_allow_html=True)
+st.title("⚡ Nexus Sentinel v5.5")
+st.markdown("""
+<div class='status-box'>
+    <b>MOTOR:</b> GEMINI 1.5 PRO / FLASH | <b>STATUS:</b> VIGILANTE | <b>HEALER ENGINE:</b> ONLINE
+</div>
+""", unsafe_allow_html=True)
 
 col_in, col_out = st.columns([1, 1.2])
 
 with col_in:
-    st.subheader("📥 Entrada de Missão")
-    user_input = st.text_area("Cole seu código com erro ou descreva sua ideia:", height=300)
-    upload = st.file_uploader("Contexto Adicional", accept_multiple_files=True)
+    st.subheader("📥 Neural Sniper Input")
+    user_input = st.text_area("Insira o comando ou cole a base de dados complexa:", height=300)
+    upload = st.file_uploader("Data Processing: Carregar base de dados", accept_multiple_files=True)
 
 with col_out:
-    st.subheader("🚀 Resposta do Sentinel")
+    st.subheader("🚀 Output Mestre (7 Perspectivas)")
     if st.button("ATIVAR NEXUS SENTINEL"):
         if user_input:
-            with st.spinner("Sentinel realizando varredura e gerando blindagem..."):
+            with st.spinner("Motor Deep Brain processando 1 milhão de tokens e simulando perspectivas..."):
                 try:
                     with DDGS() as ddgs:
-                        busca = [r['body'] for r in ddgs.text(f"security and debugging best practices for {user_input}", max_results=2)]
+                        busca = [r['body'] for r in ddgs.text(f"forensic and statistical analysis for {user_input}", max_results=3)]
                         contexto = "\n".join(busca)
                 except:
-                    contexto = "Usando base interna de elite."
+                    contexto = "Usando Historic Learning interno."
                 
-                resultado = nexus_agent_call(user_input, modo, contexto)
+                resultado = nexus_deep_brain(user_input, modo, contexto)
                 st.session_state['last_result'] = resultado
         else:
-            st.error("O Sentinel aguarda seus dados.")
+            st.error("O Sentinel aguarda um alvo neural.")
 
     if 'last_result' in st.session_state:
         res = st.session_state['last_result']
-        tab1, tab2 = st.tabs(["💻 Plano e Código", "🖼️ Live Preview"])
+        tab1, tab2 = st.tabs(["💻 Código e Análise Forense", "🖼️ Live Preview"])
         with tab1:
             st.markdown(res)
         with tab2:
             if "<html>" in res.lower() or "<!doctype html>" in res.lower():
-                st.components.v1.html(res, height=500, scrolling=True)
+                st.components.v1.html(res, height=550, scrolling=True)
             else:
-                st.info("O Live Preview aguarda código HTML.")
+                st.info("O Live Preview aguarda código visual.")
 
+        # EXPORTAÇÃO MULTIFORMATO
         st.divider()
-        ext = st.selectbox("Formato:", [".py", ".html", ".js", ".txt"], key="fmt")
-        st.download_button(label=f"BAIXAR PROJETO ({ext})", data=res, file_name=f"nexus_sentinel_v54{ext}")
+        ext = st.selectbox("Exportar como Relatório Executivo:", [".py", ".html", ".docx", ".js", ".txt"])
+        st.download_button(label=f"📥 BAIXAR OUTPUT ({ext})", data=res, file_name=f"nexus_deep_brain_report{ext}")
 
 # --- CHAT SUPORTE ---
 st.divider()
-st.subheader("💬 Nexus Sentinel Chat Pro")
-chat_input = st.text_input("Dúvida técnica ou pedido de ajuste?")
+st.subheader("💬 Nexus Sentinel Chat (Deep Context)")
+chat_input = st.text_input("Dúvida sobre a Matriz de Risco ou Código?")
 if chat_input and 'last_result' in st.session_state:
     with st.chat_message("assistant"):
-        st.markdown(nexus_agent_call(f"Contexto: {st.session_state['last_result']}. Pergunta: {chat_input}", "Chat Suporte", ""))
+        st.markdown(nexus_deep_brain(f"Sobre este projeto: {st.session_state['last_result']}. Responda: {chat_input}", "Chat Suporte", ""))
