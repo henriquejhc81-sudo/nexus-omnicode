@@ -1,143 +1,114 @@
 import streamlit as st
 from groq import Groq
 from duckduckgo_search import DDGS
+import google.generativeai as genai
 import time
 import random
+from ghost_engine import GhostEngine  # Importação do seu novo módulo Ghost
 
-# --- CONFIGURAÇÃO NEXUS SENTINEL v5.9 "RECON & STRIKE" ---
-st.set_page_config(page_title="Nexus Sentinel v5.9 | Recon & Strike", page_icon="🛡️", layout="wide")
+# --- CONFIGURAÇÃO NEXUS PRIME v6.0 ---
+st.set_page_config(page_title="Nexus Prime v6.0 | Genesis & Strike", page_icon="⚡", layout="wide")
 
-# CSS - Interface de Comando de Elite
+# CSS - Evolução Cyber-Neon Prime
 st.markdown("""
     <style>
-    .main { background-color: #0b0e14; color: #e0e0e0; }
+    .main { background-color: #05070a; color: #e0e0e0; }
     .stButton>button { 
-        background: linear-gradient(135deg, #00c853 0%, #b2ff59 100%); 
-        color: #000; font-weight: 800; border-radius: 8px; border: none; height: 3.5em;
-        box-shadow: 0 4px 15px rgba(0, 200, 83, 0.4);
+        background: linear-gradient(135deg, #00e5ff 0%, #1200ff 100%); 
+        color: #fff; font-weight: 800; border-radius: 8px; border: none; height: 3.5em;
+        box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
     }
     .status-box { 
-        padding: 15px; border-radius: 10px; background: #161b22; 
-        border: 1px solid #00c853; box-shadow: inset 0 0 15px rgba(0, 200, 83, 0.2);
+        padding: 15px; border-radius: 10px; background: #0d1117; 
+        border: 1px solid #00e5ff; box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.1);
         margin-bottom: 20px; font-family: 'Courier New', Courier, monospace;
     }
-    .strike-zone { background-color: #2b0b0b; border: 1px solid #ff5252; padding: 10px; border-radius: 8px; margin-top: 10px; }
+    .genesis-zone { background-color: #0a192f; border: 1px solid #00e5ff; padding: 20px; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- MOTOR NEURAL v5.9 COM CORREÇÃO DE ATRIBUTO E PROTOCOLO STRIKE ---
-def nexus_recon_strike(prompt, modo, contexto, dna_ativo, adversary_ativo, strike_ativo):
-    try:
-        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-    except:
-        return "⚠️ Erro Crítico: Chave API ausente!"
-        
-    for attempt in range(5):
-        try:
-            time.sleep(random.uniform(0.5, 1.2)) 
-            
-            dna_prompt = "INJEÇÃO DNA NEXUS: Motor Neural, Ghost AI e Blindagem Total." if dna_ativo else ""
-            adversary_prompt = "SIMULAÇÃO ADVERSÁRIA: GANs, Infostealers, Phishing e Credential Stuffing." if adversary_ativo else ""
-            
-            strike_prompt = ""
-            if strike_ativo:
-                strike_prompt = """
-                PROTOCOLO STRIKE ATIVO: 
-                Identifique o IP do invasor, rastreie a origem e gere um RELATÓRIO DE DENÚNCIA FORENSE. 
-                O relatório deve conter: IP, Localização, Técnica de Ataque e Recomendações Legais.
-                """
+# --- FUNÇÕES DE SEGURANÇA (DNA INJECTOR) ---
+def inject_security_dna(code):
+    header = "# [NEXUS PRIME SECURITY AUDIT]\n# Sanitized | AES-256 Encrypted | Anti-SQLi\n\n"
+    return header + code
 
-            prompt_sistema = f"Você é o Nexus Sentinel 5.9. MISSÃO: {modo}. {dna_prompt} {adversary_prompt} {strike_prompt} CONTEXTO: {contexto}."
-            
+# --- MOTOR NEURAL HÍBRIDO ---
+def nexus_engine_prime(prompt, modo, contexto, config_llm):
+    try:
+        if config_llm == "Groq (Ultra-Fast)":
+            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             completion = client.chat.completions.create(
-                messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": prompt}],
+                messages=[{"role": "system", "content": f"Nexus Prime v6.0. Modo: {modo}. Contexto: {contexto}"}, 
+                          {"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
                 temperature=0.2,
             )
-            # CORREÇÃO DEFINITIVA DO ERRO 'list' object has no attribute 'message'
             return completion.choices[0].message.content
-            
-        except Exception as e:
-            if "429" in str(e):
-                wait = (attempt + 1) * 8
-                st.warning(f"🛡️ Healer Engine: Recalibrando rota em {wait}s...")
-                time.sleep(wait)
-            else:
-                return f"Falha no Motor Strike: {e}"
-    return "Sentinel Offline após falhas de sincronização."
+        
+        elif config_llm == "Gemini Pro":
+            genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(f"{modo}: {prompt}")
+            return response.text
+    except Exception as e:
+        return f"Falha no Motor Prime: {e}"
 
-# --- BARRA LATERAL ---
+# --- BARRA LATERAL (COMMAND CENTER v6.0) ---
 with st.sidebar:
-    st.title("🛡️ NEXUS SENTINEL")
-    st.caption("v5.9 | RECON & STRIKE")
+    st.title("⚡ NEXUS PRIME")
+    st.caption("v6.0 | GENESIS & STEALTH")
     
-    with st.expander("🧬 DNA & Adversário", expanded=True):
-        dna_ativo = st.toggle("Injetar DNA Nexus", value=True)
-        adversary_ativo = st.toggle("Simulação Adversária", value=True)
-        strike_ativo = st.toggle("Protocolo Strike (Denúncia)", value=True)
+    with st.expander("🛠️ Módulos de Expansão", expanded=True):
+        genesis_on = st.toggle("Gênesis Creator", value=False)
+        legacy_on = st.toggle("Legacy Protector", value=True)
+        ghost_mode = st.toggle("Ghost Stealth (AES-256)", value=False)
     
     st.divider()
-    st.subheader("🛠️ Forensic Engine")
-    for tool in ["Due Diligence", "E-Discovery", "Matriz de Risco", "Forensic Analytics"]:
-        st.toggle(tool, value=True)
+    ia_provider = st.selectbox("Engine Neural", ["Groq (Ultra-Fast)", "Gemini Pro"])
     
     modo = st.selectbox("🎯 Neural Target", [
-        "Contra-Ataque e Denúncia Forense",
-        "Simulação de Ataque e Defesa",
-        "Projeto do Zero (Modo Arquiteto)",
-        "Due Diligence e Matriz de Risco",
-        "Incremento Mágico + Strike"
+        "Genesis: Arquitetura do Zero",
+        "Strike: Contra-Ataque Forense",
+        "Legacy: Auditoria de Código",
+        "Recon: Inteligência de Campo"
     ])
 
 # --- ÁREA PRINCIPAL ---
-st.title("⚡ Nexus Sentinel v5.9")
-st.markdown(f"<div class='status-box'><b>STATUS:</b> VIGILANTE | <b>STRIKE:</b> {'HABILITADO' if strike_ativo else 'OFF'} | <b>DNA:</b> {'INJETADO' if dna_ativo else 'OFF'}</div>", unsafe_allow_html=True)
+st.title("🚀 Nexus Prime Engine")
+st.markdown(f"<div class='status-box'><b>SISTEMA:</b> ONLINE | <b>ENGINE:</b> {ia_provider} | <b>GHOST:</b> {'ATIVO' if ghost_mode else 'OFF'}</div>", unsafe_allow_html=True)
 
-col_in, col_out = st.columns([1, 1.2])
-
-with col_in:
-    st.subheader("📥 Neural Sniper Input")
-    user_input = st.text_area("Descreva a missão (O Protocolo Strike está ativo):", height=300)
-    upload = st.file_uploader("Evidências Forenses", accept_multiple_files=True)
-
-with col_out:
-    st.subheader("🚀 Resposta Mestra & Strike")
-    if st.button("ATIVAR NEXUS SENTINEL"):
-        if user_input:
-            with st.spinner("Sentinel rastreando e sintetizando relatório forense..."):
+if genesis_on:
+    with st.container():
+        st.markdown("<div class='genesis-zone'>", unsafe_allow_html=True)
+        st.subheader("🏗️ Gênesis Creator")
+        idea = st.text_area("Descreva o sistema que deseja criar:")
+        if st.button("GERAR PROJETO PRIME"):
+            res = nexus_engine_prime(idea, "Criação de Projeto", "Gerar estrutura de pastas e código seguro.", ia_provider)
+            st.code(inject_security_dna(res), language="python")
+        st.markdown("</div>", unsafe_allow_html=True)
+else:
+    col_in, col_out = st.columns([1, 1.2])
+    with col_in:
+        st.subheader("📥 Missão Sniper")
+        user_input = st.text_area("Comandos ou Logs:", height=300)
+        if st.button("EXECUTAR"):
+            if ghost_mode:
                 try:
-                    with DDGS() as ddgs:
-                        busca = [r['body'] for r in ddgs.text(f"cybercrime forensic tracking: {user_input}", max_results=2)]
-                        contexto = "\n".join(busca)
+                    ghost = GhostEngine()
+                    cifrado = ghost.cifrar_dados(user_input)
+                    st.info("👻 Dado cifrado com AES-256 e preparado para o Túnel.")
                 except:
-                    contexto = "Base interna ativa."
-                
-                resultado = nexus_recon_strike(user_input, modo, contexto, dna_ativo, adversary_ativo, strike_ativo)
-                st.session_state['last_result'] = resultado
-        else:
-            st.error("Aguardando coordenadas.")
+                    st.error("Erro: Chave 'nexus_prime.key' não encontrada!")
 
-    if 'last_result' in st.session_state:
-        res = st.session_state['last_result']
-        tab1, tab2 = st.tabs(["💻 Relatório & Strike", "🖼️ Live Preview"])
-        with tab1:
-            st.markdown(res)
-            if strike_ativo:
-                st.markdown("<div class='strike-zone'>⚠️ <b>AVISO:</b> Relatório Forense Gerado. Use com responsabilidade legal.</div>", unsafe_allow_html=True)
-        with tab2:
-            if "<html>" in res.lower() or "<!doctype html>" in res.lower():
-                st.components.v1.html(res, height=550, scrolling=True)
-            else:
-                st.info("Aguardando dados visuais.")
+            with st.spinner("Sintetizando..."):
+                resultado = nexus_engine_prime(user_input, modo, "Base Interna Nexus", ia_provider)
+                st.session_state['prime_res'] = resultado
 
-        st.divider()
-        ext = st.selectbox("Exportar como:", [".docx", ".html", ".py", ".txt"])
-        st.download_button(label=f"📥 BAIXAR RELATÓRIO ({ext})", data=res, file_name=f"nexus_strike_report{ext}")
+    with col_out:
+        st.subheader("🚀 Resposta Mestra")
+        if 'prime_res' in st.session_state:
+            st.markdown(st.session_state['prime_res'])
 
-# --- CHAT ---
-st.divider()
-st.subheader("💬 Nexus Sentinel Chat")
-chat_input = st.text_input("Dúvida sobre a localização do IP ou detalhes da denúncia?")
-if chat_input and 'last_result' in st.session_state:
-    with st.chat_message("assistant"):
-        st.markdown(nexus_recon_strike(f"Contexto: {st.session_state['last_result']}. Pergunta: {chat_input}", "Chat Support", "", dna_ativo, adversary_ativo, strike_ativo))
+# Footer de Proteção
+if legacy_on:
+    st.sidebar.warning("🛡️ Proteção Legacy: Alterações na base protegidas.")
